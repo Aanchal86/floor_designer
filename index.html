@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>PlanCraft | 2D Floor Plan Designer</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header class="topbar">
+
+    <div class="logo">
+        PLANCRAFT
+    </div>
+
+    <div class="top-actions">
+        <button id="undoBtn">Undo</button>
+        <button id="redoBtn">Redo</button>
+        <button id="saveBtn">Save</button>
+        <button id="loadBtn">Load</button>
+        <button id="clearBtn">Clear</button>
+        <button id="exportBtn" class="primary-btn">Export PNG</button>
+    </div>
+
+</header>
+
+
+<main class="app">
+
+    <!-- LEFT TOOLBAR -->
+
+    <aside class="sidebar">
+
+        <h2>Drawing</h2>
+
+        <button class="tool-btn active" data-tool="select">
+            Select
+        </button>
+
+        <button class="tool-btn" data-tool="wall">
+            Wall
+        </button>
+
+        <button class="tool-btn" data-tool="room">
+            Room
+        </button>
+
+        <button class="tool-btn" data-tool="door">
+            Door
+        </button>
+
+        <button class="tool-btn" data-tool="window">
+            Window
+        </button>
+
+        <hr>
+
+        <h2>Furniture</h2>
+
+        <button class="tool-btn" data-tool="chair">
+            Chair
+        </button>
+
+        <button class="tool-btn" data-tool="table">
+            Table
+        </button>
+
+        <button class="tool-btn" data-tool="bed">
+            Bed
+        </button>
+
+        <button class="tool-btn" data-tool="sofa">
+            Sofa
+        </button>
+
+        <button class="tool-btn" data-tool="dining">
+            Dining Table
+        </button>
+
+        <button class="tool-btn" data-tool="toilet">
+            Toilet
+        </button>
+
+        <button class="tool-btn" data-tool="plant">
+            Plant
+        </button>
+
+        <hr>
+
+        <h2>Edit</h2>
+
+        <button id="rotateBtn">
+            Rotate
+        </button>
+
+        <button id="scaleUpBtn">
+            Scale +
+        </button>
+
+        <button id="scaleDownBtn">
+            Scale -
+        </button>
+
+        <button id="renameBtn">
+            Rename Room
+        </button>
+
+        <button id="duplicateBtn">
+            Duplicate
+        </button>
+
+        <button id="bringFrontBtn">
+            Bring To Front
+        </button>
+
+        <button id="sendBackBtn">
+            Send To Back
+        </button>
+
+        <button id="deleteBtn">
+            Delete
+        </button>
+
+        <hr>
+
+        <h2>View</h2>
+
+        <button id="zoomInBtn">
+            Zoom +
+        </button>
+
+        <button id="zoomOutBtn">
+            Zoom -
+        </button>
+
+        <button id="resetZoomBtn">
+            Reset Zoom
+        </button>
+
+    </aside>
+
+
+    <!-- WORKSPACE -->
+
+    <section class="workspace">
+
+        <div class="workspace-header">
+
+            <div>
+                <h1>2D Floor Plan Designer</h1>
+
+                <p>
+                    Draw rooms, place furniture and design your floor plan interactively.
+                </p>
+            </div>
+
+            <div class="zoom-display">
+                Zoom:
+                <span id="zoomValue">100%</span>
+            </div>
+
+        </div>
+
+
+        <div class="canvas-wrapper">
+            <canvas id="floorCanvas"></canvas>
+        </div>
+
+
+        <div class="statusbar">
+
+            <span>
+                Tool:
+                <strong id="currentToolText">
+                    Select
+                </strong>
+            </span>
+
+            <span>
+                Selected:
+                <strong id="selectedObjectText">
+                    None
+                </strong>
+            </span>
+
+            <span>
+                Grid:
+                <strong>
+                    25 px
+                </strong>
+            </span>
+
+        </div>
+
+    </section>
+
+
+    <!-- RIGHT PANEL -->
+
+    <aside class="properties-panel">
+
+        <h2>Properties</h2>
+
+        <p class="property-help" id="propertyHelp">
+            Select an object to inspect its properties.
+        </p>
+
+
+        <div id="propertyContent" class="property-content hidden">
+
+            <div class="property-group">
+
+                <label>Type</label>
+
+                <input
+                    id="propertyType"
+                    type="text"
+                    disabled
+                >
+
+            </div>
+
+
+            <div class="property-row">
+
+                <div class="property-group">
+
+                    <label>X</label>
+
+                    <input
+                        id="propertyX"
+                        type="number"
+                        disabled
+                    >
+
+                </div>
+
+                <div class="property-group">
+
+                    <label>Y</label>
+
+                    <input
+                        id="propertyY"
+                        type="number"
+                        disabled
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div id="roomProperties" class="hidden">
+
+                <div class="property-group">
+
+                    <label>Room Name</label>
+
+                    <input
+                        id="propertyName"
+                        type="text"
+                        disabled
+                    >
+
+                </div>
+
+
+                <div class="property-row">
+
+                    <div class="property-group">
+
+                        <label>Width</label>
+
+                        <input
+                            id="propertyWidth"
+                            type="number"
+                            disabled
+                        >
+
+                    </div>
+
+                    <div class="property-group">
+
+                        <label>Height</label>
+
+                        <input
+                            id="propertyHeight"
+                            type="number"
+                            disabled
+                        >
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div id="transformProperties" class="hidden">
+
+                <div class="property-group">
+
+                    <label>Rotation</label>
+
+                    <input
+                        id="propertyRotation"
+                        type="text"
+                        disabled
+                    >
+
+                </div>
+
+                <div class="property-group">
+
+                    <label>Scale</label>
+
+                    <input
+                        id="propertyScale"
+                        type="text"
+                        disabled
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div id="wallProperties" class="hidden">
+
+                <div class="property-group">
+
+                    <label>Wall Length</label>
+
+                    <input
+                        id="propertyLength"
+                        type="text"
+                        disabled
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="property-tip">
+                Select an object and use the Edit controls on the left.
+            </div>
+
+        </div>
+
+
+        <div class="legend">
+
+            <h3>Quick Guide</h3>
+
+            <p>
+                <strong>Room / Wall:</strong>
+                click and drag.
+            </p>
+
+            <p>
+                <strong>Furniture:</strong>
+                click to place.
+            </p>
+
+            <p>
+                <strong>Select:</strong>
+                click an object and drag it.
+            </p>
+
+            <p>
+                <strong>Delete:</strong>
+                select an object and press Delete.
+            </p>
+
+            <p>
+                <strong>Undo:</strong>
+                Ctrl + Z
+            </p>
+
+            <p>
+                <strong>Redo:</strong>
+                Ctrl + Y
+            </p>
+
+        </div>
+
+    </aside>
+
+</main>
+
+
+<script src="script.js"></script>
+
+</body>
+</html>
