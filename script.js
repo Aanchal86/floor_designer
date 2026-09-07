@@ -16,6 +16,9 @@ let selectedObject = null;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
 
+let activePointerId = null;
+let dragStateSaved = false;
+
 let zoomLevel = 1;
 
 const minZoom = 0.5;
@@ -28,7 +31,7 @@ let redoStack = [];
 
 
 /* =========================================
-   BASIC HELPERS
+   HELPERS
 ========================================= */
 
 function resizeCanvas() {
@@ -48,9 +51,10 @@ function resizeCanvas() {
 }
 
 function snap(value) {
-    return Math.round(
-        value / gridSize
-    ) * gridSize;
+    return (
+        Math.round(value / gridSize) *
+        gridSize
+    );
 }
 
 function capitalize(text) {
@@ -92,7 +96,7 @@ function restoreObjects(state) {
 
 
 /* =========================================
-   DEFAULT DEMO PLAN
+   DEFAULT DEMO
 ========================================= */
 
 function loadDemoPlan() {
@@ -184,41 +188,33 @@ function loadDemoPlan() {
         },
 
         {
-            type: "table",
-            x: 580,
-            y: 180,
+            type: "sofa",
+            x: 500,
+            y: 120,
             rotation: 0,
             scale: 0.9
         },
 
         {
-            type: "chair",
-            x: 500,
-            y: 180,
+            type: "table",
+            x: 580,
+            y: 210,
             rotation: 0,
             scale: 0.8
         },
 
         {
-            type: "sofa",
-            x: 500,
-            y: 110,
-            rotation: 0,
-            scale: 0.9
-        },
-
-        {
             type: "dining",
             x: 500,
-            y: 395,
+            y: 400,
             rotation: 0,
-            scale: 0.9
+            scale: 0.85
         },
 
         {
             type: "toilet",
             x: 170,
-            y: 395,
+            y: 400,
             rotation: 0,
             scale: 0.8
         },
@@ -265,7 +261,9 @@ function updateStatus() {
 
         selectedText.textContent =
             label;
-    } else {
+    }
+
+    else {
         selectedText.textContent =
             "None";
     }
@@ -273,14 +271,16 @@ function updateStatus() {
     document.getElementById(
         "zoomValue"
     ).textContent =
-        `${Math.round(zoomLevel * 100)}%`;
+        `${Math.round(
+            zoomLevel * 100
+        )}%`;
 
     updatePropertiesPanel();
 }
 
 
 /* =========================================
-   PROPERTIES
+   PROPERTIES PANEL
 ========================================= */
 
 function updatePropertiesPanel() {
@@ -369,10 +369,10 @@ function updatePropertiesPanel() {
         const length =
             Math.hypot(
                 selectedObject.x2 -
-                    selectedObject.x1,
+                selectedObject.x1,
 
                 selectedObject.y2 -
-                    selectedObject.y1
+                selectedObject.y1
             );
 
         document.getElementById(
@@ -524,7 +524,7 @@ function drawGrid() {
 
 
 /* =========================================
-   TRANSFORM HELPER
+   TRANSFORMS
 ========================================= */
 
 function beginTransform(obj) {
@@ -547,7 +547,7 @@ function beginTransform(obj) {
 
 
 /* =========================================
-   DRAW OBJECTS
+   DRAW FUNCTIONS
 ========================================= */
 
 function drawWall(obj) {
@@ -652,15 +652,8 @@ function drawDoor(obj) {
 
     ctx.beginPath();
 
-    ctx.moveTo(
-        0,
-        0
-    );
-
-    ctx.lineTo(
-        50,
-        0
-    );
+    ctx.moveTo(0, 0);
+    ctx.lineTo(50, 0);
 
     ctx.stroke();
 
@@ -691,15 +684,8 @@ function drawWindow(obj) {
 
     ctx.beginPath();
 
-    ctx.moveTo(
-        -25,
-        0
-    );
-
-    ctx.lineTo(
-        25,
-        0
-    );
+    ctx.moveTo(-25, 0);
+    ctx.lineTo(25, 0);
 
     ctx.stroke();
 
@@ -710,25 +696,11 @@ function drawWindow(obj) {
 
     ctx.beginPath();
 
-    ctx.moveTo(
-        -25,
-        -6
-    );
+    ctx.moveTo(-25, -6);
+    ctx.lineTo(25, -6);
 
-    ctx.lineTo(
-        25,
-        -6
-    );
-
-    ctx.moveTo(
-        -25,
-        6
-    );
-
-    ctx.lineTo(
-        25,
-        6
-    );
+    ctx.moveTo(-25, 6);
+    ctx.lineTo(25, 6);
 
     ctx.stroke();
 
@@ -779,15 +751,8 @@ function drawBed(obj) {
 
     ctx.beginPath();
 
-    ctx.moveTo(
-        -40,
-        -15
-    );
-
-    ctx.lineTo(
-        40,
-        -15
-    );
+    ctx.moveTo(-40, -15);
+    ctx.lineTo(40, -15);
 
     ctx.stroke();
 
@@ -846,20 +811,6 @@ function drawChair(obj) {
         40,
         40
     );
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        -20,
-        -20
-    );
-
-    ctx.lineTo(
-        20,
-        -20
-    );
-
-    ctx.stroke();
 
     ctx.restore();
 }
@@ -952,33 +903,10 @@ function drawDining(obj) {
     ctx.fillStyle =
         "#9ca3af";
 
-    ctx.fillRect(
-        -15,
-        -55,
-        30,
-        18
-    );
-
-    ctx.fillRect(
-        -15,
-        37,
-        30,
-        18
-    );
-
-    ctx.fillRect(
-        -70,
-        -10,
-        18,
-        20
-    );
-
-    ctx.fillRect(
-        52,
-        -10,
-        18,
-        20
-    );
+    ctx.fillRect(-15, -55, 30, 18);
+    ctx.fillRect(-15, 37, 30, 18);
+    ctx.fillRect(-70, -10, 18, 20);
+    ctx.fillRect(52, -10, 18, 20);
 
     ctx.restore();
 }
@@ -1072,15 +1000,8 @@ function drawPlant(obj) {
 
     ctx.beginPath();
 
-    ctx.moveTo(
-        0,
-        8
-    );
-
-    ctx.lineTo(
-        0,
-        -25
-    );
+    ctx.moveTo(0, 8);
+    ctx.lineTo(0, -25);
 
     ctx.stroke();
 
@@ -1132,8 +1053,14 @@ function drawPlant(obj) {
     ctx.restore();
 }
 
+
+/* =========================================
+   OBJECT DISPATCH
+========================================= */
+
 function drawObject(obj) {
     switch (obj.type) {
+
         case "wall":
             drawWall(obj);
             break;
@@ -1182,11 +1109,12 @@ function drawObject(obj) {
 
 
 /* =========================================
-   SELECTION
+   OBJECT SIZE
 ========================================= */
 
 function getObjectSize(obj) {
     const sizes = {
+
         bed: [100, 140],
         table: [110, 80],
         chair: [65, 65],
@@ -1203,6 +1131,11 @@ function getObjectSize(obj) {
         [80, 80]
     );
 }
+
+
+/* =========================================
+   SELECTION
+========================================= */
 
 function drawSelection(obj) {
     ctx.save();
@@ -1261,8 +1194,14 @@ function drawSelection(obj) {
         ctx.strokeRect(
             minX - 10,
             minY - 10,
-            Math.max(width, 10) + 20,
-            Math.max(height, 10) + 20
+            Math.max(
+                width,
+                10
+            ) + 20,
+            Math.max(
+                height,
+                10
+            ) + 20
         );
     }
 
@@ -1276,19 +1215,14 @@ function drawSelection(obj) {
         ctx.strokeRect(
             obj.x -
                 width *
-                scale /
-                2,
+                scale / 2,
 
             obj.y -
                 height *
-                scale /
-                2,
+                scale / 2,
 
-            width *
-                scale,
-
-            height *
-                scale
+            width * scale,
+            height * scale
         );
     }
 
@@ -1343,26 +1277,41 @@ function redraw() {
 
 
 /* =========================================
-   MOUSE POSITION
+   POINTER POSITION
 ========================================= */
 
-function getMousePosition(event) {
+function getPointerPosition(event) {
     const rect =
         canvas.getBoundingClientRect();
 
+    const scaleX =
+        canvas.width /
+        rect.width;
+
+    const scaleY =
+        canvas.height /
+        rect.height;
+
     return {
+
         x: snap(
             (
-                event.clientX -
-                rect.left
+                (
+                    event.clientX -
+                    rect.left
+                ) *
+                scaleX
             ) /
             zoomLevel
         ),
 
         y: snap(
             (
-                event.clientY -
-                rect.top
+                (
+                    event.clientY -
+                    rect.top
+                ) *
+                scaleY
             ) /
             zoomLevel
         )
@@ -1403,10 +1352,8 @@ function distanceToLine(
 
     let t =
         (
-            (px - x1) *
-                dx +
-            (py - y1) *
-                dy
+            (px - x1) * dx +
+            (py - y1) * dy
         ) /
         lengthSquared;
 
@@ -1467,7 +1414,7 @@ function isPointInsideObject(
                 obj.y1,
                 obj.x2,
                 obj.y2
-            ) <= 15
+            ) <= 18
         );
     }
 
@@ -1481,26 +1428,22 @@ function isPointInsideObject(
         x >=
             obj.x -
             width *
-            scale /
-            2 &&
+            scale / 2 &&
 
         x <=
             obj.x +
             width *
-            scale /
-            2 &&
+            scale / 2 &&
 
         y >=
             obj.y -
             height *
-            scale /
-            2 &&
+            scale / 2 &&
 
         y <=
             obj.y +
             height *
-            scale /
-            2
+            scale / 2
     );
 }
 
@@ -1532,14 +1475,24 @@ function findObjectAt(
 
 
 /* =========================================
-   MOUSE EVENTS
+   POINTER DOWN
 ========================================= */
 
 canvas.addEventListener(
-    "mousedown",
+    "pointerdown",
     event => {
+
+        event.preventDefault();
+
+        activePointerId =
+            event.pointerId;
+
+        canvas.setPointerCapture(
+            event.pointerId
+        );
+
         const pos =
-            getMousePosition(
+            getPointerPosition(
                 event
             );
 
@@ -1547,17 +1500,19 @@ canvas.addEventListener(
             currentTool ===
             "select"
         ) {
+
             selectedObject =
                 findObjectAt(
                     pos.x,
                     pos.y
                 );
 
+            dragStateSaved =
+                false;
+
             if (
                 selectedObject
             ) {
-                saveState();
-
                 isDragging =
                     true;
 
@@ -1641,6 +1596,7 @@ canvas.addEventListener(
             saveState();
 
             objects.push({
+
                 type:
                     currentTool,
 
@@ -1663,11 +1619,26 @@ canvas.addEventListener(
 );
 
 
+/* =========================================
+   POINTER MOVE
+========================================= */
+
 canvas.addEventListener(
-    "mousemove",
+    "pointermove",
     event => {
+
+        if (
+            activePointerId !== null &&
+            event.pointerId !==
+                activePointerId
+        ) {
+            return;
+        }
+
+        event.preventDefault();
+
         const pos =
-            getMousePosition(
+            getPointerPosition(
                 event
             );
 
@@ -1677,17 +1648,45 @@ canvas.addEventListener(
             isDragging &&
             selectedObject
         ) {
+
+            let changed = false;
+
             if (
                 selectedObject.type ===
                 "room"
             ) {
-                selectedObject.x =
+                const newX =
                     pos.x -
                     dragOffsetX;
 
-                selectedObject.y =
+                const newY =
                     pos.y -
                     dragOffsetY;
+
+                if (
+                    newX !==
+                        selectedObject.x ||
+                    newY !==
+                        selectedObject.y
+                ) {
+                    changed = true;
+                }
+
+                if (
+                    changed &&
+                    !dragStateSaved
+                ) {
+                    saveState();
+
+                    dragStateSaved =
+                        true;
+                }
+
+                selectedObject.x =
+                    newX;
+
+                selectedObject.y =
+                    newY;
             }
 
             else if (
@@ -1710,6 +1709,24 @@ canvas.addEventListener(
                     newY -
                     selectedObject.y1;
 
+                if (
+                    dx !== 0 ||
+                    dy !== 0
+                ) {
+                    changed =
+                        true;
+                }
+
+                if (
+                    changed &&
+                    !dragStateSaved
+                ) {
+                    saveState();
+
+                    dragStateSaved =
+                        true;
+                }
+
                 selectedObject.x1 +=
                     dx;
 
@@ -1724,13 +1741,39 @@ canvas.addEventListener(
             }
 
             else {
-                selectedObject.x =
+                const newX =
                     pos.x -
                     dragOffsetX;
 
-                selectedObject.y =
+                const newY =
                     pos.y -
                     dragOffsetY;
+
+                if (
+                    newX !==
+                        selectedObject.x ||
+                    newY !==
+                        selectedObject.y
+                ) {
+                    changed =
+                        true;
+                }
+
+                if (
+                    changed &&
+                    !dragStateSaved
+                ) {
+                    saveState();
+
+                    dragStateSaved =
+                        true;
+                }
+
+                selectedObject.x =
+                    newX;
+
+                selectedObject.y =
+                    newY;
             }
 
             redraw();
@@ -1749,6 +1792,7 @@ canvas.addEventListener(
             "wall"
         ) {
             drawWall({
+
                 type:
                     "wall",
 
@@ -1795,6 +1839,7 @@ canvas.addEventListener(
                 );
 
             drawRoom({
+
                 type:
                     "room",
 
@@ -1811,18 +1856,41 @@ canvas.addEventListener(
 );
 
 
+/* =========================================
+   POINTER UP
+========================================= */
+
 canvas.addEventListener(
-    "mouseup",
+    "pointerup",
     event => {
+
+        event.preventDefault();
+
         const pos =
-            getMousePosition(
+            getPointerPosition(
                 event
             );
+
+        if (
+            canvas.hasPointerCapture(
+                event.pointerId
+            )
+        ) {
+            canvas.releasePointerCapture(
+                event.pointerId
+            );
+        }
+
+        activePointerId =
+            null;
 
         if (
             isDragging
         ) {
             isDragging =
+                false;
+
+            dragStateSaved =
                 false;
 
             redraw();
@@ -1847,6 +1915,7 @@ canvas.addEventListener(
                 saveState();
 
                 objects.push({
+
                     type:
                         "wall",
 
@@ -1902,6 +1971,7 @@ canvas.addEventListener(
                 saveState();
 
                 objects.push({
+
                     type:
                         "room",
 
@@ -1924,13 +1994,24 @@ canvas.addEventListener(
 );
 
 
+/* =========================================
+   POINTER CANCEL
+========================================= */
+
 canvas.addEventListener(
-    "mouseleave",
+    "pointercancel",
     () => {
+
+        activePointerId =
+            null;
+
         isDrawing =
             false;
 
         isDragging =
+            false;
+
+        dragStateSaved =
             false;
 
         redraw();
@@ -1947,14 +2028,17 @@ document
         ".tool-btn"
     )
     .forEach(button => {
+
         button.addEventListener(
             "click",
             () => {
+
                 document
                     .querySelectorAll(
                         ".tool-btn"
                     )
                     .forEach(btn => {
+
                         btn.classList.remove(
                             "active"
                         );
@@ -1998,7 +2082,9 @@ document
     .addEventListener(
         "click",
         () => {
+
             if (!selectedObject) {
+
                 alert(
                     "Select an object first."
                 );
@@ -2012,6 +2098,7 @@ document
                 selectedObject.type ===
                     "wall"
             ) {
+
                 alert(
                     "Rooms and walls cannot be rotated with this button."
                 );
@@ -2044,7 +2131,9 @@ document
     .addEventListener(
         "click",
         () => {
+
             if (!selectedObject) {
+
                 alert(
                     "Select an object first."
                 );
@@ -2069,6 +2158,7 @@ document
                 selectedObject.type ===
                 "wall"
             ) {
+
                 const dx =
                     selectedObject.x2 -
                     selectedObject.x1;
@@ -2086,19 +2176,21 @@ document
                 if (
                     length > 0
                 ) {
-                    selectedObject.x2 +=
-                        (
+                    selectedObject.x2 =
+                        snap(
+                            selectedObject.x2 +
                             dx /
-                            length
-                        ) *
-                        gridSize;
+                            length *
+                            gridSize
+                        );
 
-                    selectedObject.y2 +=
-                        (
+                    selectedObject.y2 =
+                        snap(
+                            selectedObject.y2 +
                             dy /
-                            length
-                        ) *
-                        gridSize;
+                            length *
+                            gridSize
+                        );
                 }
             }
 
@@ -2129,7 +2221,9 @@ document
     .addEventListener(
         "click",
         () => {
+
             if (!selectedObject) {
+
                 alert(
                     "Select an object first."
                 );
@@ -2171,6 +2265,7 @@ document
                 selectedObject.type ===
                 "wall"
             ) {
+
                 const dx =
                     selectedObject.x2 -
                     selectedObject.x1;
@@ -2194,29 +2289,31 @@ document
 
                 saveState();
 
-                selectedObject.x2 -=
-                    (
+                selectedObject.x2 =
+                    snap(
+                        selectedObject.x2 -
                         dx /
-                        length
-                    ) *
-                    gridSize;
+                        length *
+                        gridSize
+                    );
 
-                selectedObject.y2 -=
-                    (
+                selectedObject.y2 =
+                    snap(
+                        selectedObject.y2 -
                         dy /
-                        length
-                    ) *
-                    gridSize;
+                        length *
+                        gridSize
+                    );
             }
 
             else {
+
                 const scale =
                     selectedObject.scale ||
                     1;
 
                 if (
-                    scale <=
-                    0.5
+                    scale <= 0.5
                 ) {
                     return;
                 }
@@ -2225,8 +2322,7 @@ document
 
                 selectedObject.scale =
                     Math.max(
-                        scale -
-                            0.1,
+                        scale - 0.1,
                         0.5
                     );
             }
@@ -2237,7 +2333,7 @@ document
 
 
 /* =========================================
-   RENAME ROOM
+   RENAME
 ========================================= */
 
 document
@@ -2247,11 +2343,13 @@ document
     .addEventListener(
         "click",
         () => {
+
             if (
                 !selectedObject ||
                 selectedObject.type !==
                     "room"
             ) {
+
                 alert(
                     "Select a room first."
                 );
@@ -2292,7 +2390,9 @@ document
     .addEventListener(
         "click",
         () => {
+
             if (!selectedObject) {
+
                 alert(
                     "Select an object first."
                 );
@@ -2334,9 +2434,7 @@ document
                     gridSize;
             }
 
-            objects.push(
-                copy
-            );
+            objects.push(copy);
 
             selectedObject =
                 copy;
@@ -2347,7 +2445,7 @@ document
 
 
 /* =========================================
-   BRING TO FRONT
+   LAYERS
 ========================================= */
 
 document
@@ -2357,11 +2455,8 @@ document
     .addEventListener(
         "click",
         () => {
-            if (!selectedObject) {
-                alert(
-                    "Select an object first."
-                );
 
+            if (!selectedObject) {
                 return;
             }
 
@@ -2393,10 +2488,6 @@ document
     );
 
 
-/* =========================================
-   SEND TO BACK
-========================================= */
-
 document
     .getElementById(
         "sendBackBtn"
@@ -2404,11 +2495,8 @@ document
     .addEventListener(
         "click",
         () => {
-            if (!selectedObject) {
-                alert(
-                    "Select an object first."
-                );
 
+            if (!selectedObject) {
                 return;
             }
 
@@ -2443,48 +2531,83 @@ document
    DELETE
 ========================================= */
 
+function deleteSelected() {
+
+    if (!selectedObject) {
+        return;
+    }
+
+    const index =
+        objects.indexOf(
+            selectedObject
+        );
+
+    if (
+        index !== -1
+    ) {
+        saveState();
+
+        objects.splice(
+            index,
+            1
+        );
+    }
+
+    selectedObject =
+        null;
+
+    redraw();
+}
+
 document
     .getElementById(
         "deleteBtn"
     )
     .addEventListener(
         "click",
-        () => {
-            if (!selectedObject) {
-                alert(
-                    "Select an object first."
-                );
-
-                return;
-            }
-
-            const index =
-                objects.indexOf(
-                    selectedObject
-                );
-
-            if (
-                index !== -1
-            ) {
-                saveState();
-
-                objects.splice(
-                    index,
-                    1
-                );
-            }
-
-            selectedObject =
-                null;
-
-            redraw();
-        }
+        deleteSelected
     );
 
 
 /* =========================================
-   UNDO
+   UNDO / REDO
 ========================================= */
+
+function undo() {
+
+    if (
+        undoStack.length ===
+        0
+    ) {
+        return;
+    }
+
+    redoStack.push(
+        cloneObjects()
+    );
+
+    restoreObjects(
+        undoStack.pop()
+    );
+}
+
+function redo() {
+
+    if (
+        redoStack.length ===
+        0
+    ) {
+        return;
+    }
+
+    undoStack.push(
+        cloneObjects()
+    );
+
+    restoreObjects(
+        redoStack.pop()
+    );
+}
 
 document
     .getElementById(
@@ -2492,28 +2615,8 @@ document
     )
     .addEventListener(
         "click",
-        () => {
-            if (
-                undoStack.length ===
-                0
-            ) {
-                return;
-            }
-
-            redoStack.push(
-                cloneObjects()
-            );
-
-            restoreObjects(
-                undoStack.pop()
-            );
-        }
+        undo
     );
-
-
-/* =========================================
-   REDO
-========================================= */
 
 document
     .getElementById(
@@ -2521,27 +2624,12 @@ document
     )
     .addEventListener(
         "click",
-        () => {
-            if (
-                redoStack.length ===
-                0
-            ) {
-                return;
-            }
-
-            undoStack.push(
-                cloneObjects()
-            );
-
-            restoreObjects(
-                redoStack.pop()
-            );
-        }
+        redo
     );
 
 
 /* =========================================
-   SAVE
+   SAVE / LOAD
 ========================================= */
 
 document
@@ -2551,6 +2639,7 @@ document
     .addEventListener(
         "click",
         () => {
+
             localStorage.setItem(
                 "plancraft-floor-plan",
                 JSON.stringify(
@@ -2565,10 +2654,6 @@ document
     );
 
 
-/* =========================================
-   LOAD
-========================================= */
-
 document
     .getElementById(
         "loadBtn"
@@ -2576,12 +2661,14 @@ document
     .addEventListener(
         "click",
         () => {
+
             const saved =
                 localStorage.getItem(
                     "plancraft-floor-plan"
                 );
 
             if (!saved) {
+
                 alert(
                     "No saved floor plan found."
                 );
@@ -2590,6 +2677,7 @@ document
             }
 
             try {
+
                 const data =
                     JSON.parse(
                         saved
@@ -2601,7 +2689,7 @@ document
                     )
                 ) {
                     throw new Error(
-                        "Invalid saved floor plan."
+                        "Invalid floor plan."
                     );
                 }
 
@@ -2629,12 +2717,13 @@ document
             }
 
             catch (error) {
+
                 console.error(
                     error
                 );
 
                 alert(
-                    "Could not load the saved floor plan."
+                    "Could not load the floor plan."
                 );
             }
         }
@@ -2652,6 +2741,7 @@ document
     .addEventListener(
         "click",
         () => {
+
             if (
                 objects.length ===
                 0
@@ -2682,7 +2772,7 @@ document
 
 
 /* =========================================
-   EXPORT PNG
+   EXPORT
 ========================================= */
 
 document
@@ -2692,6 +2782,7 @@ document
     .addEventListener(
         "click",
         () => {
+
             const previousSelection =
                 selectedObject;
 
@@ -2734,6 +2825,7 @@ document
     .addEventListener(
         "click",
         () => {
+
             zoomLevel =
                 Math.min(
                     maxZoom,
@@ -2757,6 +2849,7 @@ document
     .addEventListener(
         "click",
         () => {
+
             zoomLevel =
                 Math.max(
                     minZoom,
@@ -2780,8 +2873,8 @@ document
     .addEventListener(
         "click",
         () => {
-            zoomLevel =
-                1;
+
+            zoomLevel = 1;
 
             redraw();
         }
@@ -2789,22 +2882,18 @@ document
 
 
 /* =========================================
-   KEYBOARD SHORTCUTS
+   KEYBOARD
 ========================================= */
 
 document.addEventListener(
     "keydown",
     event => {
+
         if (
             event.key ===
-                "Delete" &&
-            selectedObject
+            "Delete"
         ) {
-            document
-                .getElementById(
-                    "deleteBtn"
-                )
-                .click();
+            deleteSelected();
         }
 
         if (
@@ -2814,11 +2903,7 @@ document.addEventListener(
         ) {
             event.preventDefault();
 
-            document
-                .getElementById(
-                    "undoBtn"
-                )
-                .click();
+            undo();
         }
 
         if (
@@ -2828,11 +2913,7 @@ document.addEventListener(
         ) {
             event.preventDefault();
 
-            document
-                .getElementById(
-                    "redoBtn"
-                )
-                .click();
+            redo();
         }
 
         if (
@@ -2862,7 +2943,18 @@ document.addEventListener(
 
 window.addEventListener(
     "resize",
-    resizeCanvas
+    () => {
+
+        clearTimeout(
+            window.resizeTimer
+        );
+
+        window.resizeTimer =
+            setTimeout(
+                resizeCanvas,
+                100
+            );
+    }
 );
 
 loadDemoPlan();
