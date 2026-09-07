@@ -34,12 +34,16 @@ The application allows users to create simple floor plans, place architectural e
 - Export floor plans as PNG
 - Built-in demonstration floor plan
 - Responsive user interface
+- Mobile touch support using Pointer Events
+- Works with mouse, touch, and stylus input
+- Responsive mobile layout
 
 ## Technologies Used
 
 - HTML5
 - CSS3
 - JavaScript
+- Pointer Events API
 - HTML Canvas API
 - Local Storage
 - Git
