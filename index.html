@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlanCraft | Smart Floor Plan Designer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header class="topbar">
+    <div>
+        <div class="logo">PLANCRAFT</div>
+        <div class="subtitle">Interactive 2D Floor Plan Designer</div>
+    </div>
+
+    <div class="top-actions">
+        <button id="undoBtn">Undo</button>
+        <button id="redoBtn">Redo</button>
+        <button id="saveBtn">Save Plan</button>
+        <button id="loadBtn">Load Plan</button>
+        <button id="exportJsonBtn">Export JSON</button>
+        <button id="exportPngBtn">Export PNG</button>
+        <button id="resetBtn">New Plan</button>
+
+        <button
+            id="finalizeBtn"
+            class="primary-btn"
+            disabled
+        >
+            Finalize 2D Layout
+        </button>
+    </div>
+</header>
+
+
+<main class="main-container">
+
+    <section
+        id="setupSection"
+        class="setup-section"
+    >
+        <div class="setup-card">
+
+            <div class="step-label">
+                STEP 1
+            </div>
+
+            <h1>Create Your Floor</h1>
+
+            <p class="section-description">
+                Enter the total floor dimensions and number of rooms.
+            </p>
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="floorWidth">
+                        Floor Width
+                    </label>
+
+                    <div class="input-unit">
+                        <input
+                            id="floorWidth"
+                            type="number"
+                            min="5"
+                            value="40"
+                        >
+                        <span>ft</span>
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="floorHeight">
+                        Floor Height
+                    </label>
+
+                    <div class="input-unit">
+                        <input
+                            id="floorHeight"
+                            type="number"
+                            min="5"
+                            value="30"
+                        >
+                        <span>ft</span>
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="roomCount">
+                        Number of Rooms
+                    </label>
+
+                    <input
+                        id="roomCount"
+                        type="number"
+                        min="1"
+                        max="12"
+                        value="4"
+                    >
+                </div>
+
+            </div>
+
+            <button
+                id="continueBtn"
+                class="main-btn"
+            >
+                Continue
+            </button>
+
+            <p
+                id="setupError"
+                class="error-message"
+            ></p>
+
+        </div>
+    </section>
+
+
+    <section
+        id="roomSection"
+        class="setup-section hidden"
+    >
+
+        <div class="setup-card wide-card">
+
+            <div class="step-label">
+                STEP 2
+            </div>
+
+            <h1>Room Details</h1>
+
+            <p class="section-description">
+                Enter the name and dimensions of each room.
+            </p>
+
+            <div class="floor-summary">
+                Floor:
+                <strong id="floorSummary"></strong>
+            </div>
+
+            <div
+                id="roomInputs"
+                class="room-inputs"
+            ></div>
+
+            <div class="action-row">
+
+                <button
+                    id="backBtn"
+                    class="secondary-btn"
+                >
+                    Back
+                </button>
+
+                <button
+                    id="generateBtn"
+                    class="main-btn"
+                >
+                    Generate Layout
+                </button>
+
+            </div>
+
+            <p
+                id="roomError"
+                class="error-message"
+            ></p>
+
+        </div>
+
+    </section>
+
+
+    <section
+        id="designerSection"
+        class="designer-section hidden"
+    >
+
+        <aside class="designer-sidebar">
+
+            <div class="step-label">
+                STEP 3
+            </div>
+
+            <h2>Floor Layout</h2>
+
+            <p class="sidebar-help">
+                Move and resize rooms, then add furniture.
+            </p>
+
+
+            <div class="info-box">
+
+                <div>
+                    <span>Floor</span>
+                    <strong id="designerFloorSize"></strong>
+                </div>
+
+                <div>
+                    <span>Rooms</span>
+                    <strong id="designerRoomCount"></strong>
+                </div>
+
+                <div>
+                    <span>Furniture</span>
+                    <strong id="designerFurnitureCount">0</strong>
+                </div>
+
+                <div>
+                    <span>Wall Height</span>
+                    <strong>9 ft</strong>
+                </div>
+
+                <div>
+                    <span>Wall Thickness</span>
+                    <strong>0.5 ft</strong>
+                </div>
+
+            </div>
+
+
+            <hr>
+
+            <h3>Rooms</h3>
+
+            <div
+                id="roomList"
+                class="room-list"
+            ></div>
+
+
+            <hr>
+
+            <h3>Furniture</h3>
+
+            <p class="small-help">
+                Drag an item onto the floor or click it to place quickly.
+            </p>
+
+
+            <div
+                id="furniturePalette"
+                class="furniture-palette"
+            >
+
+                <div
+                    class="furniture-item"
+                    data-type="bed"
+                    draggable="true"
+                >
+                    <span>🛏️</span>
+                    <small>Bed</small>
+                </div>
+
+                <div
+                    class="furniture-item"
+                    data-type="sofa"
+                    draggable="true"
+                >
+                    <span>🛋️</span>
+                    <small>Sofa</small>
+                </div>
+
+                <div
+                    class="furniture-item"
+                    data-type="table"
+                    draggable="true"
+                >
+                    <span>▣</span>
+                    <small>Table</small>
+                </div>
+
+                <div
+                    class="furniture-item"
+                    data-type="chair"
+                    draggable="true"
+                >
+                    <span>🪑</span>
+                    <small>Chair</small>
+                </div>
+
+                <div
+                    class="furniture-item"
+                    data-type="dining"
+                    draggable="true"
+                >
+                    <span>🍽️</span>
+                    <small>Dining</small>
+                </div>
+
+                <div
+                    class="furniture-item"
+                    data-type="toilet"
+                    draggable="true"
+                >
+                    <span>🚽</span>
+                    <small>Toilet</small>
+                </div>
+
+                <div
+                    class="furniture-item"
+                    data-type="plant"
+                    draggable="true"
+                >
+                    <span>🪴</span>
+                    <small>Plant</small>
+                </div>
+
+            </div>
+
+
+            <div
+                id="furnitureControls"
+                class="furniture-controls hidden"
+            >
+                <button id="rotateFurnitureBtn">
+                    Rotate 90°
+                </button>
+
+                <button
+                    id="deleteFurnitureBtn"
+                    class="danger-btn"
+                >
+                    Delete
+                </button>
+            </div>
+
+
+            <hr>
+
+            <button
+                id="regenerateBtn"
+                class="sidebar-btn"
+            >
+                Regenerate Layout
+            </button>
+
+            <button
+                id="editDimensionsBtn"
+                class="sidebar-btn"
+            >
+                Edit Room Dimensions
+            </button>
+
+
+            <div class="tip-box">
+                <strong>Shortcuts</strong>
+
+                <p>
+                    Ctrl + Z = Undo<br>
+                    Ctrl + Y = Redo
+                </p>
+            </div>
+
+        </aside>
+
+
+        <section class="workspace">
+
+            <div class="workspace-header">
+
+                <div>
+                    <h1>2D Floor Layout</h1>
+                    <p>
+                        Arrange rooms, furnish the layout and export it for 3D conversion.
+                    </p>
+                </div>
+
+                <div
+                    id="selectedRoomInfo"
+                    class="selected-info"
+                >
+                    Selected: None
+                </div>
+
+            </div>
+
+
+            <div class="canvas-container">
+                <canvas id="floorCanvas"></canvas>
+            </div>
+
+
+            <div class="statusbar">
+
+                <span>
+                    Scale:
+                    <strong id="scaleInfo">-</strong>
+                </span>
+
+                <span>
+                    Selected:
+                    <strong id="selectedName">None</strong>
+                </span>
+
+                <span>
+                    Drag rooms or furniture to reposition
+                </span>
+
+            </div>
+
+        </section>
+
+    </section>
+
+</main>
+
+<script src="script.js"></script>
+
+</body>
+</html>
